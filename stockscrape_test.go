@@ -1,4 +1,4 @@
-package StockScrape
+package stockscrape
 
 import (
 	"encoding/json"
@@ -24,4 +24,13 @@ func TestStockScrapeCompanyName(t *testing.T) {
 	if got := s.CompanyName; got != want {
 		t.Errorf("ScrapeStockHistory(\"MTD\") Company Name = %q, want %q", got, want)
 	}
+
+}
+
+func TestDate(t *testing.T) {
+	want := "2020-04-19"
+	if got := convertYDate("Apr 19, 2020"); got != want {
+		t.Errorf("convertYDate(\"Apr 19, 2020\") = %q, want %q", got, want)
+	}
+	convertYDate("Apr 19, 2020")
 }

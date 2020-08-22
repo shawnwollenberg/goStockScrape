@@ -1,4 +1,4 @@
-package StockScrape
+package stockscrape
 
 import (
 	"encoding/json"
@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 //StockData will be built into JSON for output of scrapeStockHistory
@@ -14,6 +15,12 @@ type StockData struct {
 	Symbol       string
 	CompanyName  string
 	DtStockPrice map[string]float64
+}
+
+func convertYDate(dt string) string {
+	t, _ := time.Parse("Jan 02, 2006", dt)
+	return t.Format("2006-01-02")
+	//return string(t.String())
 }
 
 //ScrapeStockHistory retrieves the latest historical close prices for a symbol.  For Crypto add on "-USD" (ex: ETH-USD)
@@ -82,10 +89,8 @@ func ScrapeStockHistory(symbol string) []byte {
 				if err != nil {
 					price = 0
 				}
-				dtClosePrice[sColsOutput[0]] = price
+				dtClosePrice[convertYDate(sColsOutput[0])] = price
 			}
-
-			//insert += "Insert into " + dbconnect.DbName + ".dbo.[00T_Stock_Price_Load] (Symbol,[Date],[Close],Volume) Values('" + indexLookup[a][1] + "','" + sColsOutput[0] + "'," + strings.Replace(sColsOutput[5], ",", "", -1) + "," + strings.Replace(sColsOutput[6], ",", "", -1) + ");"
 		}
 	}
 	m := StockData{symbol, coName, dtClosePrice}
