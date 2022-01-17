@@ -28,14 +28,26 @@ func ScrapeStockHistory(symbol string) []byte {
 	//for crypto use ETH-USD as symbol ... if error try adding "-USD"
 	fmt.Println("Starting " + symbol + "....")
 	var coName string
+	client := &http.Client{}
 	dtClosePrice := make(map[string]float64)
-	response, err := http.Get("https://finance.yahoo.com/quote/" + symbol + "/history/")
+	//response, err := http.Get("https://finance.yahoo.com/quote/" + symbol + "/history/")
+	request, err := http.NewRequest("GET", "https://finance.yahoo.com/quote/"+symbol+"/history/", nil)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	request.Header.Set("User-Agent", "Not Firefox")
+
+	//response, err := http.Get(indexLookup[a][0])
+	response, err := client.Do(request)
 	if err != nil {
 		///LOG + RETURN ERRORS
 		fmt.Println(err.Error())
 	}
 	defer response.Body.Close()
 	dataInBytes, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 	pageContent := string(dataInBytes)
 	coNameStart := strings.Index(pageContent, "<h1 class=") //only one instance of 'h1 class=' and </h1
 	if coNameStart != -1 {
@@ -71,7 +83,7 @@ func ScrapeStockHistory(symbol string) []byte {
 		sCols := strings.Split(sRows[i], "<span")
 		holdStr := ""
 		for j := 0; j < len(sCols); j++ {
-			if strings.Index(sCols[j], "<table") < 0 {
+			if !strings.Contains(sCols[j], "<table") {
 				colStart := strings.Index(sCols[j], ">") + 1
 				colEnd := strings.Index(sCols[j], "</span")
 				if colEnd > 0 {
@@ -94,6 +106,6 @@ func ScrapeStockHistory(symbol string) []byte {
 		}
 	}
 	m := StockData{symbol, coName, dtClosePrice}
-	b, err := json.Marshal(m)
+	b, _ := json.Marshal(m)
 	return b
 }
