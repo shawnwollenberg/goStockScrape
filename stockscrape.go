@@ -1,7 +1,7 @@
 package stockscrape
 
 import (
-	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -24,8 +24,10 @@ func convertYDate(dt string) string {
 }
 
 //ScrapeStockHistory retrieves the latest historical close prices for a symbol.  For Crypto add on "-USD" (ex: ETH-USD)
-func ScrapeStockHistory(symbol string) []byte {
+//func ScrapeStockHistory(symbol string) []byte {
+func ScrapeStockHistory(symbol string) (StockData, error) {
 	//for crypto use ETH-USD as symbol ... if error try adding "-USD"
+	var sd StockData
 	fmt.Println("Starting " + symbol + "....")
 	var coName string
 	client := &http.Client{}
@@ -63,18 +65,18 @@ func ScrapeStockHistory(symbol string) []byte {
 		if !strings.Contains(symbol, "-USD") {
 			return ScrapeStockHistory(symbol + "-USD")
 		}
-		return []byte(`{"ERROR":"No Name For This"}`)
+		return sd, errors.New("ERROR No Name For This")
 	}
 	tblStart := strings.Index(pageContent, "<table")
 	if tblStart == -1 {
 		///LOG + RETURN ERRORS
-		return []byte(`{"ERROR":"No opening element found"}`)
+		return sd, errors.New("No opening element found")
 	}
 
 	tblEnd := strings.Index(pageContent, "</tbody")
 	if tblEnd == -1 {
 		///LOG + RETURN ERRORS
-		return []byte(`{"ERROR":"No closing tag found"}`)
+		return sd, errors.New("No closing tag found")
 	}
 
 	dataTbl := pageContent[tblStart:tblEnd]
@@ -106,6 +108,6 @@ func ScrapeStockHistory(symbol string) []byte {
 		}
 	}
 	m := StockData{symbol, coName, dtClosePrice}
-	b, _ := json.Marshal(m)
-	return b
+	//b, _ := json.Marshal(m)
+	return m, nil
 }

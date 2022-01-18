@@ -1,5 +1,6 @@
 package stockscrape
 
+/*
 import (
 	"encoding/json"
 	"fmt"
@@ -34,3 +35,4 @@ func TestDate(t *testing.T) {
 	}
 	convertYDate("Apr 19, 2020")
 }
+*/
